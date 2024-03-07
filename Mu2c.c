@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 
 #define MAX_PATH_LENGTH 256
 #define MAX_LINE_LENGTH 256
@@ -40,6 +41,26 @@ int read_config(const char *filename, char music_dirs[MAX_DIRS][MAX_PATH_LENGTH]
     return 0;
 }
 
+// Function to list mp3 files in a directory
+void list_mp3_files(const char *dir, GtkListStore *store) {
+    DIR *dp;
+    struct dirent *ep;
+    char filename[MAX_PATH_LENGTH];
+
+    dp = opendir(dir);
+    if (dp != NULL) {
+        while ((ep = readdir(dp)) != NULL) {
+            if (strstr(ep->d_name, ".mp3") != NULL) {
+                snprintf(filename, MAX_PATH_LENGTH, "%s/%s", dir, ep->d_name);
+                gtk_list_store_insert_with_values(store, NULL, -1, 0, filename, -1);
+            }
+        }
+        (void)closedir(dp);
+    } else {
+        perror("Error opening directory");
+    }
+}
+
 int main(int argc, char *argv[]) {
     GtkWidget *window;
     GtkWidget *list;
@@ -66,10 +87,9 @@ int main(int argc, char *argv[]) {
     list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
     g_object_unref(store);
 
-    // Add music directories to the list view
+    // Add music files to the list view
     for (int i = 0; i < num_dirs; i++) {
-        gtk_list_store_append(store, &iter);
-        gtk_list_store_set(store, &iter, 0, music_dirs[i], -1);
+        list_mp3_files(music_dirs[i], store);
     }
 
     // Add the list view to a scrolled window
