@@ -1,2 +1,2 @@
 # Mu2c/stable
-A template I use
+Mu2c is a music client made for Linux becuase other clients are not good for one reason or another.
