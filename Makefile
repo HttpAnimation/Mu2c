@@ -52,8 +52,8 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = main.cpp 
-OBJECTS       = main.o
+SOURCES       = Mu2c.cpp 
+OBJECTS       = Mu2c.o
 DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt6/mkspecs/common/unix.conf \
 		/usr/lib64/qt6/mkspecs/common/linux.conf \
@@ -100,6 +100,7 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt6/mkspecs/features/qt_config.prf \
 		/usr/lib64/qt6/mkspecs/linux-g++/qmake.conf \
 		/usr/lib64/qt6/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/usr/lib64/qt6/mkspecs/features/exclusive_builds.prf \
 		/usr/lib64/qt6/mkspecs/features/toolchain.prf \
 		/usr/lib64/qt6/mkspecs/features/default_pre.prf \
@@ -120,7 +121,7 @@ DIST          = /usr/lib64/qt6/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt6/mkspecs/features/exceptions.prf \
 		/usr/lib64/qt6/mkspecs/features/yacc.prf \
 		/usr/lib64/qt6/mkspecs/features/lex.prf \
-		main.pro  main.cpp
+		main.pro  Mu2c.cpp
 QMAKE_TARGET  = main
 DESTDIR       = 
 TARGET        = main
@@ -178,6 +179,7 @@ Makefile: main.pro /usr/lib64/qt6/mkspecs/linux-g++/qmake.conf /usr/lib64/qt6/mk
 		/usr/lib64/qt6/mkspecs/features/qt_config.prf \
 		/usr/lib64/qt6/mkspecs/linux-g++/qmake.conf \
 		/usr/lib64/qt6/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/usr/lib64/qt6/mkspecs/features/exclusive_builds.prf \
 		/usr/lib64/qt6/mkspecs/features/toolchain.prf \
 		/usr/lib64/qt6/mkspecs/features/default_pre.prf \
@@ -249,6 +251,7 @@ Makefile: main.pro /usr/lib64/qt6/mkspecs/linux-g++/qmake.conf /usr/lib64/qt6/mk
 /usr/lib64/qt6/mkspecs/features/qt_config.prf:
 /usr/lib64/qt6/mkspecs/linux-g++/qmake.conf:
 /usr/lib64/qt6/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /usr/lib64/qt6/mkspecs/features/exclusive_builds.prf:
 /usr/lib64/qt6/mkspecs/features/toolchain.prf:
 /usr/lib64/qt6/mkspecs/features/default_pre.prf:
@@ -288,7 +291,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt6/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents Mu2c.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -338,8 +341,8 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-main.o: main.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
+Mu2c.o: Mu2c.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Mu2c.o Mu2c.cpp
 
 ####### Install
 
