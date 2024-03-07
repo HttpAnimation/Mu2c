@@ -47,27 +47,32 @@ void on_row_activated(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColu
         // Print the filename (In actual implementation, you would play the file here)
         g_print("Playing: %s\n", filename);
 
+        // Play the file using mpg123
+        char command[MAX_PATH_LENGTH + 10]; // Ensure enough space for the command
+        snprintf(command, sizeof(command), "mpg123 \"%s\"", filename);
+        system(command); // Execute the command
+
         g_free(filename);
     }
 }
 
-// Callback function for handling play button click events
+// Callback function for handling play button click event
 void on_play_button_clicked(GtkButton *button, gpointer user_data) {
     g_print("Play button clicked\n");
-    // Add code to play the selected MP3 file
 }
 
 int main(int argc, char *argv[]) {
     GtkWidget *window;
-    GtkWidget *grid;
     GtkWidget *list;
     GtkListStore *store;
     GtkTreeSelection *selection;
     GtkWidget *play_button;
+    GtkWidget *grid;
     char music_dir[] = "music";
     char mp3_files[MAX_FILES][MAX_PATH_LENGTH];
     int num_files = 0;
 
+    // Initialize GTK
     gtk_init(&argc, &argv);
 
     // Create a window
@@ -76,7 +81,7 @@ int main(int argc, char *argv[]) {
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    // Create a grid layout
+    // Create a grid to layout the widgets
     grid = gtk_grid_new();
     gtk_container_add(GTK_CONTAINER(window), grid);
 
@@ -103,18 +108,18 @@ int main(int argc, char *argv[]) {
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
     g_signal_connect(selection, "changed", G_CALLBACK(on_row_activated), NULL);
 
-    // Add the list view to the grid layout
+    // Add the list view to the grid
     gtk_grid_attach(GTK_GRID(grid), list, 0, 0, 1, 1);
 
-    // Create a play button
+    // Create and add play button to the grid
     play_button = gtk_button_new_with_label("Play");
     g_signal_connect(play_button, "clicked", G_CALLBACK(on_play_button_clicked), NULL);
-
-    // Add the play button to the grid layout
     gtk_grid_attach(GTK_GRID(grid), play_button, 0, 1, 1, 1);
 
+    // Show all widgets
     gtk_widget_show_all(window);
 
+    // Run the GTK main loop
     gtk_main();
 
     return 0;
