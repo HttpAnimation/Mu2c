@@ -5,7 +5,6 @@
 #include <dirent.h>
 
 #define MAX_PATH_LENGTH 256
-#define MAX_LINE_LENGTH 256
 #define MAX_FILES 1000
 
 // Function to list mp3 files in a directory
@@ -61,6 +60,11 @@ int main(int argc, char *argv[]) {
             gtk_list_store_set(store, &iter, 0, mp3_files[i], -1);
         }
     }
+
+    // Create a tree view column
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("Files", renderer, "text", 0, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
     // Add the list view to a scrolled window
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
