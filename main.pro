@@ -1,4 +1,4 @@
 QT += widgets
-SOURCES += main.cpp
+SOURCES += Mu2c.cpp
 HEADERS +=
 FORMS +=
