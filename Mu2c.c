@@ -75,9 +75,10 @@ int main(int argc, char *argv[]) {
 
     // Add music files to the list view
     if (list_mp3_files(music_dir, mp3_files, &num_files) != -1) {
+        GtkTreeIter iter;
         for (int i = 0; i < num_files; i++) {
-            gtk_list_store_append(store, NULL, NULL);
-            gtk_list_store_set(store, NULL, 0, mp3_files[i], -1);
+            gtk_list_store_append(store, &iter);
+            gtk_list_store_set(store, &iter, 0, mp3_files[i], -1);
         }
     }
 
