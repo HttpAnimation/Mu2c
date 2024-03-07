@@ -31,11 +31,31 @@ int list_mp3_files(const char *dir, char mp3_files[MAX_FILES][MAX_PATH_LENGTH], 
     }
 }
 
+// Callback function for handling double-click events
+void on_row_activated(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data) {
+    GtkTreeModel *model;
+    GtkTreeIter   iter;
+
+    // Get the model associated with the tree view
+    model = gtk_tree_view_get_model(tree_view);
+
+    // Get the selected row
+    if (gtk_tree_model_get_iter(model, &iter, path)) {
+        gchar *filename;
+        gtk_tree_model_get(model, &iter, 0, &filename, -1);
+
+        // Print the filename (In actual implementation, you would play the file here)
+        g_print("Playing: %s\n", filename);
+
+        g_free(filename);
+    }
+}
+
 int main(int argc, char *argv[]) {
     GtkWidget *window;
     GtkWidget *list;
     GtkListStore *store;
-    GtkTreeIter iter;
+    GtkTreeSelection *selection;
     char music_dir[] = "music";
     char mp3_files[MAX_FILES][MAX_PATH_LENGTH];
     int num_files = 0;
@@ -56,8 +76,8 @@ int main(int argc, char *argv[]) {
     // Add music files to the list view
     if (list_mp3_files(music_dir, mp3_files, &num_files) != -1) {
         for (int i = 0; i < num_files; i++) {
-            gtk_list_store_append(store, &iter);
-            gtk_list_store_set(store, &iter, 0, mp3_files[i], -1);
+            gtk_list_store_append(store, NULL, NULL);
+            gtk_list_store_set(store, NULL, 0, mp3_files[i], -1);
         }
     }
 
@@ -65,6 +85,10 @@ int main(int argc, char *argv[]) {
     GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
     GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("Files", renderer, "text", 0, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
+
+    // Connect signal for handling double-click events
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
+    g_signal_connect(selection, "changed", G_CALLBACK(on_row_activated), NULL);
 
     // Add the list view to a scrolled window
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
