@@ -1,15 +1,15 @@
 # Put gitter here
-mkdir NAME
-cd NAME
-git clone -b stable https://github.com/HttpAnimation/NAME.git
-mv NAME stable
-git clone -b blank https://github.com/HttpAnimation/NAME.git
-mv NAME blank 
-git clone -b extra https://github.com/HttpAnimation/NAME.git
-mv NAME extra
-git clone -b gh-pages https://github.com/HttpAnimation/NAME.git
-mv NAME gh-pages
-git clone -b gitter https://github.com/HttpAnimation/NAME.git
-mv NAME gitter
-git clone -b main https://github.com/HttpAnimation/NAME.git
-mv NAME main
+mkdir Mu2c
+cd Mu2c
+git clone -b stable https://github.com/HttpAnimation/Mu2c.git
+mv Mu2c stable
+git clone -b blank https://github.com/HttpAnimation/Mu2c.git
+mv Mu2c blank 
+git clone -b extra https://github.com/HttpAnimation/Mu2c.git
+mv Mu2c extra
+git clone -b gh-pages https://github.com/HttpAnimation/Mu2c.git
+mv Mu2c gh-pages
+git clone -b gitter https://github.com/HttpAnimation/Mu2c.git
+mv Mu2c gitter
+git clone -b main https://github.com/HttpAnimation/Mu2c.git
+mv Mu2c main
