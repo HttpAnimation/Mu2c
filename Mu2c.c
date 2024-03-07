@@ -6,43 +6,10 @@
 
 #define MAX_PATH_LENGTH 256
 #define MAX_LINE_LENGTH 256
-#define MAX_DIRS 10
-
-// Function to read the config file and extract music directories
-int read_config(const char *filename, char music_dirs[MAX_DIRS][MAX_PATH_LENGTH], int *num_dirs) {
-    FILE *file = fopen(filename, "r");
-    if (file == NULL) {
-        perror("Error opening config file");
-        return -1;
-    }
-
-    char line[MAX_LINE_LENGTH];
-    *num_dirs = 0;
-    while (fgets(line, sizeof(line), file)) {
-        // Remove trailing newline character if present
-        line[strcspn(line, "\n")] = 0;
-
-        // Only process non-empty lines
-        if (line[0] != '\0') {
-            // Copy the directory path to the array
-            strncpy(music_dirs[*num_dirs], line, MAX_PATH_LENGTH - 1);
-            music_dirs[*num_dirs][MAX_PATH_LENGTH - 1] = '\0';
-            (*num_dirs)++;
-
-            // Ensure we don't exceed maximum directories
-            if (*num_dirs >= MAX_DIRS) {
-                fprintf(stderr, "Maximum number of directories reached.\n");
-                break;
-            }
-        }
-    }
-
-    fclose(file);
-    return 0;
-}
+#define MAX_FILES 1000
 
 // Function to list mp3 files in a directory
-void list_mp3_files(const char *dir, GtkListStore *store) {
+int list_mp3_files(const char *dir, char mp3_files[MAX_FILES][MAX_PATH_LENGTH], int *num_files) {
     DIR *dp;
     struct dirent *ep;
     char filename[MAX_PATH_LENGTH];
@@ -52,12 +19,16 @@ void list_mp3_files(const char *dir, GtkListStore *store) {
         while ((ep = readdir(dp)) != NULL) {
             if (strstr(ep->d_name, ".mp3") != NULL) {
                 snprintf(filename, MAX_PATH_LENGTH, "%s/%s", dir, ep->d_name);
-                gtk_list_store_insert_with_values(store, NULL, -1, 0, filename, -1);
+                strncpy(mp3_files[*num_files], filename, MAX_PATH_LENGTH - 1);
+                mp3_files[*num_files][MAX_PATH_LENGTH - 1] = '\0';
+                (*num_files)++;
             }
         }
         (void)closedir(dp);
+        return 0;
     } else {
         perror("Error opening directory");
+        return -1;
     }
 }
 
@@ -66,15 +37,11 @@ int main(int argc, char *argv[]) {
     GtkWidget *list;
     GtkListStore *store;
     GtkTreeIter iter;
-    char music_dirs[MAX_DIRS][MAX_PATH_LENGTH];
-    int num_dirs;
+    char music_dir[] = "music";
+    char mp3_files[MAX_FILES][MAX_PATH_LENGTH];
+    int num_files = 0;
 
     gtk_init(&argc, &argv);
-
-    // Read config file
-    if (read_config("config.conf", music_dirs, &num_dirs) == -1) {
-        exit(EXIT_FAILURE);
-    }
 
     // Create a window
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -88,8 +55,11 @@ int main(int argc, char *argv[]) {
     g_object_unref(store);
 
     // Add music files to the list view
-    for (int i = 0; i < num_dirs; i++) {
-        list_mp3_files(music_dirs[i], store);
+    if (list_mp3_files(music_dir, mp3_files, &num_files) != -1) {
+        for (int i = 0; i < num_files; i++) {
+            gtk_list_store_append(store, &iter);
+            gtk_list_store_set(store, &iter, 0, mp3_files[i], -1);
+        }
     }
 
     // Add the list view to a scrolled window
