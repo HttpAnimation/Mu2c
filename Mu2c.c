@@ -40,12 +40,17 @@ void play_button_clicked(GtkButton *button, gpointer data) {
 
     if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &filename, -1);
-        file_path = g_build_filename(MUSIC_DIRECTORY, filename, NULL);
-        play_or_pause_music(file_path, GTK_WIDGET(button));
+        gchar *file_name_with_path = g_build_filename(MUSIC_DIRECTORY, filename, NULL);
+        GFile *file = g_file_new_for_path(file_name_with_path);
+        gchar *file_uri = g_file_get_uri(file);
+        play_or_pause_music(file_uri, GTK_WIDGET(button));
         g_free(filename);
-        g_free(file_path);
+        g_free(file_name_with_path);
+        g_free(file_uri);
+        g_object_unref(file);
     }
 }
+
 
 // Function to populate the list store with music files
 void populate_music_list(GtkListStore *store) {
