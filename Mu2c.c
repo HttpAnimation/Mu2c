@@ -8,10 +8,13 @@
 
 // Function to play the selected music file
 void play_music(const gchar *filename) {
-    gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=file://%s", filename);
+    gchar *uri = g_strdup_printf("file://%s", filename);
+    gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=%s", uri);
     system(command);
+    g_free(uri);
     g_free(command);
 }
+
 
 // Callback function for the play button
 void play_button_clicked(GtkButton *button, gpointer data) {
