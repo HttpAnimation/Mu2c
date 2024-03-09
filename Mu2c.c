@@ -6,12 +6,14 @@
 // Define the directory where the music files are stored
 #define MUSIC_DIRECTORY "music"
 
-// Function to play the selected music file
 void play_music(const gchar *filename) {
-    gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=file://%s", filename);
+    gchar *file_path = g_build_filename("music", filename, NULL);
+    gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=file://%s", file_path);
     system(command);
+    g_free(file_path);
     g_free(command);
 }
+
 
 // Callback function for the play button
 void play_button_clicked(GtkButton *button, gpointer data) {
