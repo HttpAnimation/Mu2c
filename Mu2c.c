@@ -7,6 +7,7 @@
 // Define the directory where the music files are stored
 #define MUSIC_DIRECTORY "music"
 
+// Function to play the selected music file
 void play_music(const gchar *filename) {
     gchar *current_dir = g_get_current_dir();
     gchar *file_path = g_build_filename(current_dir, filename, NULL);
