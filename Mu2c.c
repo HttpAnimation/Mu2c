@@ -6,9 +6,9 @@
 // Define the directory where the music files are stored
 #define MUSIC_DIRECTORY "music"
 
-// Function to play the selected music file
+// Function to play the selected music file without showing VLC UI
 void play_music(const gchar *filename) {
-    gchar *command = g_strdup_printf("vlc '%s'", filename);
+    gchar *command = g_strdup_printf("vlc --intf dummy '%s' vlc://quit", filename);
     system(command);
     g_free(command);
 }
