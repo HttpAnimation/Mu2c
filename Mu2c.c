@@ -8,10 +8,8 @@
 
 // Function to play the selected music file
 void play_music(const gchar *filename) {
-    gchar *uri = g_strdup_printf("file://%s", filename);
-    gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=%s", uri);
+    gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=file://%s", filename);
     system(command);
-    g_free(uri);
     g_free(command);
 }
 
