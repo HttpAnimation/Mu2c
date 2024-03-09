@@ -9,7 +9,7 @@
 
 void play_music(const gchar *filename) {
     gchar *current_dir = g_get_current_dir();
-    gchar *file_path = g_build_filename(current_dir, "music", filename, NULL);
+    gchar *file_path = g_build_filename(current_dir, filename, NULL);
     gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=file://%s", file_path);
     system(command);
     g_free(current_dir);
