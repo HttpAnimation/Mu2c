@@ -11,8 +11,7 @@
 gboolean playing = FALSE; // Flag to track whether music is currently playing
 
 void play_or_pause_music(const gchar *filename, GtkWidget *play_button) {
-    gchar *current_dir = g_get_current_dir();
-    gchar *file_path = g_build_filename(current_dir, filename, NULL);
+    gchar *file_path = g_build_filename(MUSIC_DIRECTORY, filename, NULL);
     gchar *command;
 
     if (!playing) {
@@ -27,7 +26,6 @@ void play_or_pause_music(const gchar *filename, GtkWidget *play_button) {
 
     system(command);
 
-    g_free(current_dir);
     g_free(file_path);
     g_free(command);
 }
