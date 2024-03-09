@@ -8,13 +8,14 @@
 #define MUSIC_DIRECTORY "music"
 
 void play_music(const gchar *filename) {
-    gchar *file_path = g_build_filename("music", filename, NULL);
+    gchar *current_dir = g_get_current_dir();
+    gchar *file_path = g_build_filename(current_dir, "music", filename, NULL);
     gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=file://%s", file_path);
     system(command);
+    g_free(current_dir);
     g_free(file_path);
     g_free(command);
 }
-
 
 // Callback function for the play button
 void play_button_clicked(GtkButton *button, gpointer data) {
