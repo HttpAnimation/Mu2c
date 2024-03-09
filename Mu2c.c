@@ -2,6 +2,7 @@
 #include <glib.h>
 #include <string.h>
 #include <stdlib.h>
+#include <gio/gio.h>
 
 // Define the directory where the music files are stored
 #define MUSIC_DIRECTORY "music"
