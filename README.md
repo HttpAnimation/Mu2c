@@ -13,3 +13,7 @@ sudo dnf install mpg123
 ```
 
 ## Building
+1) Install gstreamer1-devel
+```bash
+sudo dnf install gstreamer1-devel
+```
