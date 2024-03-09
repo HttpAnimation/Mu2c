@@ -10,8 +10,7 @@
 // Function to play or pause the selected music file
 gboolean playing = FALSE; // Flag to track whether music is currently playing
 
-void play_or_pause_music(const gchar *filename, GtkWidget *play_button) {
-    gchar *file_path = g_build_filename(MUSIC_DIRECTORY, filename, NULL);
+void play_or_pause_music(const gchar *file_path, GtkWidget *play_button) {
     gchar *command;
 
     if (!playing) {
@@ -26,9 +25,9 @@ void play_or_pause_music(const gchar *filename, GtkWidget *play_button) {
 
     system(command);
 
-    g_free(file_path);
     g_free(command);
 }
+
 
 // Callback function for the play/pause button
 void play_button_clicked(GtkButton *button, gpointer data) {
@@ -36,12 +35,12 @@ void play_button_clicked(GtkButton *button, gpointer data) {
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
     GtkTreeModel *model;
     GtkTreeIter iter;
-    gchar *filename;
+    gchar *file_path;
 
     if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
-        gtk_tree_model_get(model, &iter, 0, &filename, -1);
-        play_or_pause_music(filename, GTK_WIDGET(button));
-        g_free(filename);
+        gtk_tree_model_get(model, &iter, 0, &file_path, -1);
+        play_or_pause_music(file_path, GTK_WIDGET(button));
+        g_free(file_path);
     }
 }
 
@@ -59,9 +58,11 @@ void populate_music_list(GtkListStore *store) {
     while ((filename = g_dir_read_name(dir)) != NULL) {
         // Check if the file is an MP3 or FLAC file
         if (g_str_has_suffix(filename, ".mp3") || g_str_has_suffix(filename, ".flac")) {
+            gchar *file_path = g_build_filename(MUSIC_DIRECTORY, filename, NULL);
             GtkTreeIter iter;
             gtk_list_store_append(store, &iter);
-            gtk_list_store_set(store, &iter, 0, filename, -1);
+            gtk_list_store_set(store, &iter, 0, file_path, -1);
+            g_free(file_path);
         }
     }
 
