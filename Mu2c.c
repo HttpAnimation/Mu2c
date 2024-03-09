@@ -1,125 +1,88 @@
 #include <gtk/gtk.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <glib.h>
 #include <string.h>
-#include <dirent.h>
+#include <stdlib.h>
 
-#define MAX_PATH_LENGTH 256
-#define MAX_FILES 1000
+// Define the directory where the music files are stored
+#define MUSIC_DIRECTORY "music"
 
-// Function to list mp3 files in a directory
-int list_mp3_files(const char *dir, char mp3_files[MAX_FILES][MAX_PATH_LENGTH], int *num_files) {
-    DIR *dp;
-    struct dirent *ep;
-    char filename[MAX_PATH_LENGTH];
-
-    dp = opendir(dir);
-    if (dp != NULL) {
-        while ((ep = readdir(dp)) != NULL) {
-            if (strstr(ep->d_name, ".mp3") != NULL) {
-                snprintf(filename, MAX_PATH_LENGTH, "%s/%s", dir, ep->d_name);
-                strncpy(mp3_files[*num_files], filename, MAX_PATH_LENGTH - 1);
-                mp3_files[*num_files][MAX_PATH_LENGTH - 1] = '\0';
-                (*num_files)++;
-            }
-        }
-        (void)closedir(dp);
-        return 0;
-    } else {
-        perror("Error opening directory");
-        return -1;
-    }
+// Function to play the selected music file
+void play_music(const gchar *filename) {
+    gchar *command = g_strdup_printf("vlc '%s'", filename);
+    system(command);
+    g_free(command);
 }
 
-// Callback function for handling double-click events
-void on_row_activated(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data) {
+// Function to handle the row activated signal
+void on_row_activated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *col, gpointer userdata) {
+    GtkTreeIter iter;
     GtkTreeModel *model;
-    GtkTreeIter   iter;
+    gchar *filename;
 
-    // Get the model associated with the tree view
-    model = gtk_tree_view_get_model(tree_view);
+    model = gtk_tree_view_get_model(treeview);
 
-    // Get the selected row
     if (gtk_tree_model_get_iter(model, &iter, path)) {
-        gchar *filename;
         gtk_tree_model_get(model, &iter, 0, &filename, -1);
-
-        // Print the filename (In actual implementation, you would play the file here)
-        g_print("Playing: %s\n", filename);
-
-        // Play the file using mpg123
-        char command[MAX_PATH_LENGTH + 10]; // Ensure enough space for the command
-        snprintf(command, sizeof(command), "mpg123 \"%s\"", filename);
-        system(command); // Execute the command
-
+        play_music(filename);
         g_free(filename);
     }
 }
 
-// Callback function for handling play button click event
-void on_play_button_clicked(GtkButton *button, gpointer user_data) {
-    g_print("Play button clicked\n");
+// Function to populate the list store with music files
+void populate_music_list(GtkListStore *store) {
+    GDir *dir;
+    const gchar *filename;
+
+    dir = g_dir_open(MUSIC_DIRECTORY, 0, NULL);
+    if (dir == NULL) {
+        g_print("Could not open music directory\n");
+        return;
+    }
+
+    while ((filename = g_dir_read_name(dir)) != NULL) {
+        gchar *file_path = g_strdup_printf("%s/%s", MUSIC_DIRECTORY, filename);
+        // Check if the file is an MP3 or FLAC file
+        if (g_str_has_suffix(filename, ".mp3") || g_str_has_suffix(filename, ".flac")) {
+            GtkTreeIter iter;
+            gtk_list_store_append(store, &iter);
+            gtk_list_store_set(store, &iter, 0, file_path, -1);
+        }
+        g_free(file_path);
+    }
+
+    g_dir_close(dir);
 }
 
 int main(int argc, char *argv[]) {
     GtkWidget *window;
-    GtkWidget *list;
+    GtkWidget *treeview;
     GtkListStore *store;
-    GtkTreeSelection *selection;
-    GtkWidget *play_button;
-    GtkWidget *grid;
-    char music_dir[] = "music";
-    char mp3_files[MAX_FILES][MAX_PATH_LENGTH];
-    int num_files = 0;
+    GtkTreeViewColumn *column;
+    GtkCellRenderer *renderer;
 
-    // Initialize GTK
     gtk_init(&argc, &argv);
 
-    // Create a window
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), "Music Client");
-    gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
+    gtk_window_set_title(GTK_WINDOW(window), "Music Player");
+    gtk_window_set_default_size(GTK_WINDOW(window), 300, 200);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    // Create a grid to layout the widgets
-    grid = gtk_grid_new();
-    gtk_container_add(GTK_CONTAINER(window), grid);
-
-    // Create a list view
     store = gtk_list_store_new(1, G_TYPE_STRING);
-    list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+    populate_music_list(store);
+
+    treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
     g_object_unref(store);
 
-    // Add music files to the list view
-    if (list_mp3_files(music_dir, mp3_files, &num_files) != -1) {
-        GtkTreeIter iter;
-        for (int i = 0; i < num_files; i++) {
-            gtk_list_store_append(store, &iter);
-            gtk_list_store_set(store, &iter, 0, mp3_files[i], -1);
-        }
-    }
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("Music Files", renderer, "text", 0, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
-    // Create a tree view column
-    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-    GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("Files", renderer, "text", 0, NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
+    gtk_container_add(GTK_CONTAINER(window), treeview);
 
-    // Connect signal for handling double-click events
-    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
-    g_signal_connect(selection, "changed", G_CALLBACK(on_row_activated), NULL);
+    g_signal_connect(treeview, "row-activated", G_CALLBACK(on_row_activated), NULL);
 
-    // Add the list view to the grid
-    gtk_grid_attach(GTK_GRID(grid), list, 0, 0, 1, 1);
-
-    // Create and add play button to the grid
-    play_button = gtk_button_new_with_label("Play");
-    g_signal_connect(play_button, "clicked", G_CALLBACK(on_play_button_clicked), NULL);
-    gtk_grid_attach(GTK_GRID(grid), play_button, 0, 1, 1, 1);
-
-    // Show all widgets
     gtk_widget_show_all(window);
 
-    // Run the GTK main loop
     gtk_main();
 
     return 0;
