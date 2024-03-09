@@ -1,14 +1,14 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <string.h>
-#include <stdlib.h>
+#include <gst/gst.h>
 
 // Define the directory where the music files are stored
 #define MUSIC_DIRECTORY "music"
 
-// Function to play the selected music file without showing VLC UI
+// Function to play the selected music file
 void play_music(const gchar *filename) {
-    gchar *command = g_strdup_printf("vlc --intf dummy '%s' vlc://quit", filename);
+    gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=file://%s", filename);
     system(command);
     g_free(command);
 }
@@ -26,12 +26,6 @@ void play_button_clicked(GtkButton *button, gpointer data) {
         play_music(filename);
         g_free(filename);
     }
-}
-
-// Callback function for the pause button (dummy implementation)
-void pause_button_clicked(GtkButton *button, gpointer data) {
-    g_print("Pause button clicked\n");
-    // Add your pause functionality here
 }
 
 // Function to populate the list store with music files
@@ -66,10 +60,11 @@ int main(int argc, char *argv[]) {
     GtkTreeViewColumn *column;
     GtkCellRenderer *renderer;
     GtkWidget *play_button;
-    GtkWidget *pause_button;
     GtkWidget *button_box;
 
     gtk_init(&argc, &argv);
+
+    gst_init(&argc, &argv);
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "Music Player");
@@ -87,14 +82,11 @@ int main(int argc, char *argv[]) {
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
     play_button = gtk_button_new_with_label("Play");
-    pause_button = gtk_button_new_with_label("Pause");
     g_signal_connect(play_button, "clicked", G_CALLBACK(play_button_clicked), treeview);
-    g_signal_connect(pause_button, "clicked", G_CALLBACK(pause_button_clicked), NULL);
 
     button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
     gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_CENTER);
     gtk_container_add(GTK_CONTAINER(button_box), play_button);
-    gtk_container_add(GTK_CONTAINER(button_box), pause_button);
 
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_box_pack_start(GTK_BOX(vbox), treeview, TRUE, TRUE, 0);
