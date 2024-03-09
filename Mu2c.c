@@ -7,18 +7,32 @@
 // Define the directory where the music files are stored
 #define MUSIC_DIRECTORY "music"
 
-// Function to play the selected music file
-void play_music(const gchar *filename) {
+// Function to play or pause the selected music file
+gboolean playing = FALSE; // Flag to track whether music is currently playing
+
+void play_or_pause_music(const gchar *filename, GtkWidget *play_button) {
     gchar *current_dir = g_get_current_dir();
     gchar *file_path = g_build_filename(current_dir, filename, NULL);
-    gchar *command = g_strdup_printf("gst-launch-1.0 playbin uri=file://%s", file_path);
+    gchar *command;
+
+    if (!playing) {
+        command = g_strdup_printf("gst-launch-1.0 playbin uri=file://%s", file_path);
+        gtk_button_set_label(GTK_BUTTON(play_button), "Pause");
+        playing = TRUE;
+    } else {
+        command = g_strdup("gst-launch-1.0 playbin uri=NULL");
+        gtk_button_set_label(GTK_BUTTON(play_button), "Play");
+        playing = FALSE;
+    }
+
     system(command);
+
     g_free(current_dir);
     g_free(file_path);
     g_free(command);
 }
 
-// Callback function for the play button
+// Callback function for the play/pause button
 void play_button_clicked(GtkButton *button, gpointer data) {
     GtkTreeView *treeview = GTK_TREE_VIEW(data);
     GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
@@ -28,9 +42,7 @@ void play_button_clicked(GtkButton *button, gpointer data) {
 
     if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &filename, -1);
-        gchar *file_path = g_build_filename(MUSIC_DIRECTORY, filename, NULL);
-        play_music(file_path);
-        g_free(file_path);
+        play_or_pause_music(filename, button);
         g_free(filename);
     }
 }
