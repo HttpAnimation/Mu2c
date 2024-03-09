@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <string.h>
-#include <gst/gst.h>
+#include <stdlib.h>
 
 // Define the directory where the music files are stored
 #define MUSIC_DIRECTORY "music"
@@ -13,7 +13,6 @@ void play_music(const gchar *filename) {
     g_free(command);
 }
 
-
 // Callback function for the play button
 void play_button_clicked(GtkButton *button, gpointer data) {
     GtkTreeView *treeview = GTK_TREE_VIEW(data);
@@ -24,7 +23,9 @@ void play_button_clicked(GtkButton *button, gpointer data) {
 
     if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &filename, -1);
-        play_music(filename);
+        gchar *file_path = g_build_filename(MUSIC_DIRECTORY, filename, NULL);
+        play_music(file_path);
+        g_free(file_path);
         g_free(filename);
     }
 }
@@ -41,14 +42,12 @@ void populate_music_list(GtkListStore *store) {
     }
 
     while ((filename = g_dir_read_name(dir)) != NULL) {
-        gchar *file_path = g_strdup_printf("%s/%s", MUSIC_DIRECTORY, filename);
         // Check if the file is an MP3 or FLAC file
         if (g_str_has_suffix(filename, ".mp3") || g_str_has_suffix(filename, ".flac")) {
             GtkTreeIter iter;
             gtk_list_store_append(store, &iter);
-            gtk_list_store_set(store, &iter, 0, file_path, -1);
+            gtk_list_store_set(store, &iter, 0, filename, -1);
         }
-        g_free(file_path);
     }
 
     g_dir_close(dir);
@@ -64,8 +63,6 @@ int main(int argc, char *argv[]) {
     GtkWidget *button_box;
 
     gtk_init(&argc, &argv);
-
-    gst_init(&argc, &argv);
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "Music Player");
