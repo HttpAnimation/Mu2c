@@ -13,19 +13,25 @@ void play_music(const gchar *filename) {
     g_free(command);
 }
 
-// Function to handle the row activated signal
-void on_row_activated(GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *col, gpointer userdata) {
-    GtkTreeIter iter;
+// Callback function for the play button
+void play_button_clicked(GtkButton *button, gpointer data) {
+    GtkTreeView *treeview = GTK_TREE_VIEW(data);
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
     GtkTreeModel *model;
+    GtkTreeIter iter;
     gchar *filename;
 
-    model = gtk_tree_view_get_model(treeview);
-
-    if (gtk_tree_model_get_iter(model, &iter, path)) {
+    if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &filename, -1);
         play_music(filename);
         g_free(filename);
     }
+}
+
+// Callback function for the pause button (dummy implementation)
+void pause_button_clicked(GtkButton *button, gpointer data) {
+    g_print("Pause button clicked\n");
+    // Add your pause functionality here
 }
 
 // Function to populate the list store with music files
@@ -59,6 +65,9 @@ int main(int argc, char *argv[]) {
     GtkListStore *store;
     GtkTreeViewColumn *column;
     GtkCellRenderer *renderer;
+    GtkWidget *play_button;
+    GtkWidget *pause_button;
+    GtkWidget *button_box;
 
     gtk_init(&argc, &argv);
 
@@ -77,9 +86,21 @@ int main(int argc, char *argv[]) {
     column = gtk_tree_view_column_new_with_attributes("Music Files", renderer, "text", 0, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
-    gtk_container_add(GTK_CONTAINER(window), treeview);
+    play_button = gtk_button_new_with_label("Play");
+    pause_button = gtk_button_new_with_label("Pause");
+    g_signal_connect(play_button, "clicked", G_CALLBACK(play_button_clicked), treeview);
+    g_signal_connect(pause_button, "clicked", G_CALLBACK(pause_button_clicked), NULL);
 
-    g_signal_connect(treeview, "row-activated", G_CALLBACK(on_row_activated), NULL);
+    button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_CENTER);
+    gtk_container_add(GTK_CONTAINER(button_box), play_button);
+    gtk_container_add(GTK_CONTAINER(button_box), pause_button);
+
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_box_pack_start(GTK_BOX(vbox), treeview, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), button_box, FALSE, FALSE, 0);
+
+    gtk_container_add(GTK_CONTAINER(window), vbox);
 
     gtk_widget_show_all(window);
 
