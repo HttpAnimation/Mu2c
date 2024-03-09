@@ -42,7 +42,7 @@ void play_button_clicked(GtkButton *button, gpointer data) {
 
     if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &filename, -1);
-        play_or_pause_music(filename, button);
+        play_or_pause_music(filename, GTK_WIDGET(button));
         g_free(filename);
     }
 }
